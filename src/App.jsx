@@ -56,3 +56,48 @@ function Game({close}){
 }
 function Stat({label,value}){return <div className="min-w-[76px] rounded-xl border border-white/10 bg-white/[.06] px-3 py-2 text-center"><div className="text-[9px] font-black tracking-widest text-white/35">{label}</div><div className="text-lg font-black text-orange-300">{value}</div></div>}
 function Result({title,text,button,onClick,trophy}){return <div className="relative z-10 grid min-h-[650px] place-items-center p-8 text-center"><div>{trophy?<Trophy className="mx-auto h-20 w-20 text-[#FF7A00]"/>:<CheckCircle2 className="mx-auto h-20 w-20 text-emerald-300"/>}<h2 className="mt-6 text-5xl font-black tracking-[-.05em]">{title}</h2><p className="mt-4 text-white/50">{text}</p><button onClick={onClick} className="mt-7 rounded-full bg-[#FF7A00] px-8 py-3 font-black text-[#071730]">{button}</button></div></div>}
+export default function App() {
+  const [stage, setStage] = useState("loading");
+  const [member, setMember] = useState(null);
+
+  return (
+    <AnimatePresence mode="wait">
+      {stage === "loading" && (
+        <Loading done={() => setStage("login")} />
+      )}
+
+      {stage === "login" && (
+        <Login
+          unlock={(memberData) => {
+            setMember(memberData);
+            setStage("welcome");
+          }}
+          guest={() => setStage("guest")}
+        />
+      )}
+
+      {stage === "welcome" && member && (
+        <Welcome
+          member={member}
+          done={() => setStage("site")}
+        />
+      )}
+
+      {stage === "site" && member && (
+        <FamilySite
+          member={member}
+          onLogout={() => {
+            setMember(null);
+            setStage("login");
+          }}
+        />
+      )}
+
+      {stage === "guest" && (
+        <GuestEntry
+          back={() => setStage(member ? "site" : "login")}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
