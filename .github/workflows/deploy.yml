@@ -30,7 +30,29 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+      - name: Check Supabase configuration
+        shell: bash
+        run: |
+          if [[ "$VITE_SUPABASE_URL" != https://* ]]; then
+            echo "ERROR: VITE_SUPABASE_URL is missing or invalid"
+            exit 1
+          fi
 
+          if [[ -z "$VITE_SUPABASE_PUBLISHABLE_KEY" ]]; then
+            echo "ERROR: VITE_SUPABASE_PUBLISHABLE_KEY is missing"
+            exit 1
+          fi
+
+          echo "Supabase configuration detected successfully"
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+
+      - name: Build Sadam Family
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
       - name: Build Sadam Family
         run: npm run build
         env:
